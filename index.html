@@ -45,6 +45,7 @@ button.b.p{background:var(--green);color:var(--bg)}
 #login .box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;max-width:360px;width:100%;display:flex;flex-direction:column;gap:10px}
 #login .box p{margin:0;color:var(--mute);font-size:.9rem}
 #lerr{color:var(--red);font-size:.85rem;min-height:1.2em}
+#lforgot{background:none;border:0;color:var(--green);text-decoration:underline;cursor:pointer;font:inherit;font-size:.85rem}
 #lskip{background:none;border:0;color:var(--mute);text-decoration:underline;cursor:pointer;font:inherit;font-size:.85rem}
 @media print{.sync,#login{display:none!important}}
 .note{font-size:.85rem;color:var(--mute);min-height:1.2em}
@@ -104,8 +105,10 @@ h1{font-size:1.5rem}
 <p>Connectez-vous une fois : vos prix et vos commandes se synchronisent entre vos appareils.</p>
 <input id="lmail" type="email" placeholder="Adresse e-mail" autocomplete="username">
 <input id="lpass" type="password" placeholder="Mot de passe" autocomplete="current-password">
+<label style="display:flex;align-items:center;gap:8px;font-size:.9rem;color:var(--mute)"><input type="checkbox" id="lshow" style="width:auto"> Afficher le mot de passe</label>
 <div id="lerr"></div>
 <button class="b p" id="lbtn">Se connecter</button>
+<button id="lforgot">Mot de passe oublié ?</button>
 <button id="lskip">Continuer sans synchroniser</button>
 </div></div>
 <script>
@@ -228,7 +231,7 @@ if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch
 </script>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut,sendPasswordResetEmail} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {initializeFirestore,persistentLocalCache,getFirestore,doc,onSnapshot,setDoc} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 const firebaseConfig={
   apiKey:"AIzaSyDAURttcW1ZHesy1dAsLMbSOxpjRPsvzHM",
@@ -275,6 +278,13 @@ $("lbtn").onclick=async function(){
   catch(e){$("lerr").textContent=(e.code==="auth/invalid-credential"||e.code==="auth/wrong-password"||e.code==="auth/user-not-found")?"Adresse ou mot de passe incorrect.":"Connexion impossible ("+(e.code||"erreur")+")"}};
 $("lpass").addEventListener("keydown",function(e){if(e.key==="Enter")$("lbtn").click()});
 $("lskip").onclick=function(){$("login").style.display="none"};
+$("lshow").onchange=function(){$("lpass").type=this.checked?"text":"password"};
+$("lforgot").onclick=async function(){
+  var e=$("lerr"),m=$("lmail").value.trim();
+  e.style.color="var(--red)";
+  if(!m){e.textContent="Saisissez d'abord votre adresse e-mail ci-dessus.";return}
+  try{await sendPasswordResetEmail(auth,m);e.style.color="var(--green)";e.textContent="E-mail envoyé : ouvrez-le (vérifiez les courriers indésirables) et suivez le lien."}
+  catch(x){e.textContent="Envoi impossible ("+(x.code||"erreur")+")"}};
 $("logout").onclick=function(){signOut(auth)};
 window.addEventListener("offline",function(){if(auth.currentUser)status("hors connexion",0)});
 window.addEventListener("online",function(){if(auth.currentUser)status("à jour",1)});
