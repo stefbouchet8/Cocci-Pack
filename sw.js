@@ -1,6 +1,6 @@
-var C="commande-pack-1";
+var C="commande-pack-2";
 var F=["./","./index.html","./manifest.json","./icon-192.png","./icon-512.png"];
-var OK=["www.gstatic.com","fonts.googleapis.com","fonts.gstatic.com"];
+var OK=["www.gstatic.com","fonts.googleapis.com","fonts.gstatic.com","cdn.jsdelivr.net"];
 self.addEventListener("install",function(e){e.waitUntil(caches.open(C).then(function(c){return c.addAll(F)}));self.skipWaiting()});
 self.addEventListener("activate",function(e){e.waitUntil(caches.keys().then(function(k){return Promise.all(k.filter(function(n){return n!==C}).map(function(n){return caches.delete(n)}))}));self.clients.claim()});
 self.addEventListener("fetch",function(e){
